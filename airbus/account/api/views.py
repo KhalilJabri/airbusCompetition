@@ -9,7 +9,8 @@ from django.shortcuts import render
 
 from ..models import User
 
-from .serializers import LoginSerializer, RegisterUserSerializer
+from .serializers import (LoginSerializer, RegisterAdminSerializer, UserResetChangePasswordSerializer, SpecificUserSerializer,
+                          RegisterUserSerializer)
 
 
 def get_tokens_for_user(user):
@@ -42,3 +43,56 @@ class UserLoginView(APIView):
                     return Response({'message': 'The password is incorrect!'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'message': 'something went wrong!', 'error': serializer.errors},
                         status=status.HTTP_400_BAD_REQUEST)
+
+
+class AdminRegisterView(APIView):
+    # permission_classes = [IsAuthenticated, IsAdminUser]
+    def post(self, request):
+        serializer = RegisterAdminSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            # instance_user = serializer.save()
+            # instance_user.created_at = timezone.now().date()
+            # instance_user.save()
+            return Response({'message': 'registration successfully'}, status=status.HTTP_201_CREATED)
+        return Response({'message': 'something went wrong!', 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+class UserRegisterView(APIView):
+    # permission_classes = [IsAuthenticated, IsAdminUser]
+    def post(self, request):
+        serializer = RegisterUserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            # instance_user = serializer.save()
+            # instance_user.created_at = timezone.now().date()
+            # instance_user.save()
+            return Response({'message': 'registration successfully'}, status=status.HTTP_201_CREATED)
+        return Response({'message': 'something went wrong!', 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserChangePasswordView(APIView):
+    # permission_classes = [IsAuthenticated]
+    def put(self, request, pk):
+        try:
+            user = User.objects.get(id=pk)
+        except User.DoesNotExist:
+            return Response({'message': 'user not found!'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = UserResetChangePasswordSerializer(user, data=request.data)
+        if serializer.is_valid():
+            user.set_password(serializer.validated_data['password'])
+            print(serializer.validated_data['password'])
+            user.save()
+            return Response({'message': 'successful updated password'}, status=status.HTTP_202_ACCEPTED)
+
+        return Response({'message': 'something went wrong!', 'error': serializer.errors}, status=status.HTTP_404_NOT_FOUND)
+
+class GetSpecificUserView(APIView):
+    # permission_classes = [IsAuthenticated, IsAdminUser]
+    def get(self, request, pk):
+        try:
+            user = User.objects.get(id=pk)
+        except User.DoesNotExist:
+            return Response({'message': 'user not found!'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = SpecificUserSerializer(user, context={"request": request})
+        return Response({'message': 'user exist', 'data': serializer.data}, status=status.HTTP_200_OK)
+

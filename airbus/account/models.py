@@ -3,6 +3,8 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 import datetime
 from django.utils import timezone
 
+from AeroModels.models import Societe
+
 # Create your models here.
 
 class UserManager(BaseUserManager):
@@ -46,6 +48,8 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     created_at = models.DateField(default=timezone.now)
+    # societe = models.ForeignKey(Societe, on_delete=models.CASCADE, related_name='societe_det')
+    societe_id = models.ForeignKey(Societe, on_delete=models.SET_NULL, related_name='societe_det', null=True)
 
     objects = UserManager()
 

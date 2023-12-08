@@ -34,7 +34,7 @@ class dashboardView(APIView):
         noxmil = ModelAvion.objects.filter(typeAir='melitairie').aggregate(total_nox=Sum('capacityOfFuel') * 0.02)
         soxmil = ModelAvion.objects.filter(typeAir='melitairie').aggregate(total_sox=Sum('capacityOfFuel') * 0.001)
 
-        
+        # noiseAir = ModelAvion.objects.filter(typeAir=)
 
         data = {
             'numberAir': nbrAvionAir,
